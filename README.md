@@ -72,7 +72,7 @@ cases are implemented for each database:
 |:---|:---:|:---:|
 |Akumuli|X¹||
 |Cassandra|X||
-|ClickHouse|X||
+|ClickHouse|X|X|
 |CrateDB|X||
 |InfluxDB|X|X|
 |MongoDB|X|
