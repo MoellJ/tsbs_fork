@@ -3,6 +3,7 @@ package usecases
 import (
 	"github.com/timescale/tsbs/pkg/data/usecases/common"
 	"github.com/timescale/tsbs/pkg/data/usecases/devops"
+	"github.com/timescale/tsbs/pkg/data/usecases/energy_sensors"
 	"github.com/timescale/tsbs/pkg/data/usecases/iot"
 	"reflect"
 	"testing"
@@ -36,6 +37,7 @@ func TestGetSimulatorConfig(t *testing.T) {
 
 	checkType(common.UseCaseDevops, &devops.DevopsSimulatorConfig{})
 	checkType(common.UseCaseIoT, &iot.SimulatorConfig{})
+	checkType(common.UseCaseEnergySensors, &energy_sensors.SimulatorConfig{})
 	checkType(common.UseCaseCPUOnly, &devops.CPUOnlySimulatorConfig{})
 	checkType(common.UseCaseCPUSingle, &devops.CPUOnlySimulatorConfig{})
 

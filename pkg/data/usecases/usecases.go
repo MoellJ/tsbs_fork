@@ -5,6 +5,7 @@ import (
 	"github.com/timescale/tsbs/internal/utils"
 	"github.com/timescale/tsbs/pkg/data/usecases/common"
 	"github.com/timescale/tsbs/pkg/data/usecases/devops"
+	"github.com/timescale/tsbs/pkg/data/usecases/energy_sensors"
 	"github.com/timescale/tsbs/pkg/data/usecases/iot"
 	"math"
 )
@@ -41,6 +42,15 @@ func GetSimulatorConfig(dgc *common.DataGeneratorConfig) (common.SimulatorConfig
 			InitGeneratorScale:   dgc.InitialScale,
 			GeneratorScale:       dgc.Scale,
 			GeneratorConstructor: iot.NewTruck,
+		}
+	case common.UseCaseEnergySensors:
+		ret = &energy_sensors.SimulatorConfig{
+			Start: tsStart,
+			End:   tsEnd,
+
+			InitGeneratorScale:   dgc.InitialScale,
+			GeneratorScale:       dgc.Scale,
+			GeneratorConstructor: energy_sensors.NewSensor,
 		}
 	case common.UseCaseCPUOnly:
 		ret = &devops.CPUOnlySimulatorConfig{
