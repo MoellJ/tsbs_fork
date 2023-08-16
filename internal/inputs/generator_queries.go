@@ -40,6 +40,11 @@ type IoTGeneratorMaker interface {
 	NewIoT(start, end time.Time, scale int) (queryUtils.QueryGenerator, error)
 }
 
+// EnergySensorsGeneratorMaker creates a query generator energy sensor iot use case
+type EnergySensorsGeneratorMaker interface {
+	NewEnergySensors(start, end time.Time, scale int) (queryUtils.QueryGenerator, error)
+}
+
 // QueryGenerator is a type of Generator for creating queries to test against a
 // database. The output is specific to the type of database (due to each using
 // different querying techniques, e.g. SQL or REST), but is consumed by TSBS
@@ -189,6 +194,14 @@ func (g *QueryGenerator) getUseCaseGenerator(c *config.QueryGeneratorConfig) (qu
 		}
 
 		return iotFactory.NewIoT(g.tsStart, g.tsEnd, scale)
+	case common.UseCaseEnergySensors:
+		energySensorsFactory, ok := factory.(EnergySensorsGeneratorMaker)
+
+		if !ok {
+			return nil, fmt.Errorf(errUseCaseNotImplementedFmt, c.Use, c.Format)
+		}
+
+		return energySensorsFactory.NewEnergySensors(g.tsStart, g.tsEnd, scale)
 	case common.UseCaseDevops, common.UseCaseCPUOnly, common.UseCaseCPUSingle:
 		devopsFactory, ok := factory.(DevopsGeneratorMaker)
 		if !ok {

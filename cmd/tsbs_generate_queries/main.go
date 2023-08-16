@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/uses/energy_sensors"
 	"github.com/timescale/tsbs/pkg/query/config"
 	"os"
 	"time"
@@ -50,6 +51,21 @@ var useCaseMatrix = map[string]map[string]utils.QueryFillerMaker{
 		iot.LabelAvgLoad:                       iot.NewAvgLoad,
 		iot.LabelDailyActivity:                 iot.NewDailyTruckActivity,
 		iot.LabelBreakdownFrequency:            iot.NewTruckBreakdownFrequency,
+	},
+	"energy-sensors": {
+		energy_sensors.LastPointSingleSensor:                         energy_sensors.NewLastPointForSensors(1),
+		energy_sensors.LastPointMultipleSensors:                      energy_sensors.NewLastPointForSensors(10),
+		energy_sensors.SmallHistory:                                  energy_sensors.NewHistoryForSensors(1, time.Hour*24),
+		energy_sensors.LargeHistory:                                  energy_sensors.NewHistoryForSensors(20, time.Hour*24*7),
+		energy_sensors.Aggregate + energy_sensors.AggRand:            energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggRand),
+		energy_sensors.Aggregate + energy_sensors.AggRand + "-large": energy_sensors.NewAggregateForSensors(50, time.Hour*24, energy_sensors.AggRand),
+		energy_sensors.Aggregate + energy_sensors.AggAvg:             energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggAvg),
+		energy_sensors.Aggregate + energy_sensors.AggMax:             energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggMax),
+		energy_sensors.Aggregate + energy_sensors.AggMin:             energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggMin),
+		energy_sensors.Aggregate + energy_sensors.AggSum:             energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggSum),
+		energy_sensors.Aggregate + energy_sensors.AggCount:           energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggCount),
+		energy_sensors.Aggregate + energy_sensors.AggStdDev:          energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggStdDev),
+		energy_sensors.Aggregate + energy_sensors.AggVariance:        energy_sensors.NewAggregateForSensors(10, time.Hour*24, energy_sensors.AggVariance),
 	},
 }
 
