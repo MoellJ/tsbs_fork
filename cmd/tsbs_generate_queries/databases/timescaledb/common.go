@@ -65,7 +65,7 @@ func (g *BaseGenerator) NewIoT(start, end time.Time, scale int) (utils.QueryGene
 	return iot, nil
 }
 
-// NewIoT creates a new iot use case query generator.
+// NewEnergySensors creates a new energy sensors use case query generator.
 func (g *BaseGenerator) NewEnergySensors(start, end time.Time, scale int) (utils.QueryGenerator, error) {
 	core, err := energy_sensors.NewCore(start, end, scale)
 

@@ -1,7 +1,8 @@
-package timescaledb
+package influx
 
 import (
 	"fmt"
+	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/databases"
 	"github.com/timescale/tsbs/cmd/tsbs_generate_queries/uses/energy_sensors"
 	"github.com/timescale/tsbs/pkg/data/usecases/common"
 	"github.com/timescale/tsbs/pkg/query"
@@ -16,30 +17,32 @@ type EnergySensors struct {
 
 func NewEnergySensors(start, end time.Time, scale int, g *BaseGenerator) *EnergySensors {
 	c, err := energy_sensors.NewCore(start, end, scale)
-	panicIfErr(err)
+	databases.PanicIfErr(err)
 	return &EnergySensors{
 		Core:          c,
 		BaseGenerator: g,
 	}
 }
 
-func (d *EnergySensors) getSensorsWhereString(nHosts int) string {
-	names, err := d.GetRandomSensors(nHosts)
-	panicIfErr(err)
-	var nameClauses []string
+func (d *EnergySensors) getSensorsWhereString(nSensors int) string {
+	names, err := d.GetRandomSensors(nSensors)
+	databases.PanicIfErr(err)
+	nameClauses := []string{}
 	for _, s := range names {
-		nameClauses = append(nameClauses, fmt.Sprintf("'%s'", s))
+		nameClauses = append(nameClauses, fmt.Sprintf("sensorname = '%s'", s))
 	}
-	return fmt.Sprintf("sensorname IN (%s)", strings.Join(nameClauses, ","))
+
+	combinedNameClause := strings.Join(nameClauses, " or ")
+	return "(" + combinedNameClause + ")"
 }
 
 func (d *EnergySensors) LastPointForSensors(qi query.Query, nSensors int) {
 	var sql string
-	sql = fmt.Sprintf(`SELECT DISTINCT ON (sensorname) * FROM readings WHERE %s ORDER BY sensorname, time DESC`,
+	sql = fmt.Sprintf(`SELECT * from readings WHERE %s group by "sensorname" order by time desc limit 1`,
 		d.getSensorsWhereString(nSensors))
-	humanLabel := "TimescaleDB last row for sensors"
+	humanLabel := "Influx last row for sensors"
 	humanDesc := humanLabel
-	d.fillInQuery(qi, humanLabel, humanDesc, "readings", sql)
+	d.fillInQuery(qi, humanLabel, humanDesc, sql)
 }
 
 func (d *EnergySensors) HistoryForSensors(qi query.Query, nSensors int, timeRange time.Duration) {
@@ -49,9 +52,9 @@ func (d *EnergySensors) HistoryForSensors(qi query.Query, nSensors int, timeRang
 		d.getSensorsWhereString(nSensors),
 		interval.StartString(),
 		interval.EndString())
-	humanLabel := "TimescaleDB history for sensors"
+	humanLabel := "Influx history for sensors"
 	humanDesc := humanLabel
-	d.fillInQuery(qi, humanLabel, humanDesc, "readings", sql)
+	d.fillInQuery(qi, humanLabel, humanDesc, sql)
 }
 
 func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRange time.Duration, aggInterval time.Duration, aggregate string) {
@@ -59,18 +62,18 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 	if aggregate == energy_sensors.AggRand {
 		aggregate = common.RandomStringSliceChoice(energy_sensors.AggChoices)
 	}
-	aggClause := fmt.Sprintf("%[1]s(value) as %[1]s_value", aggregate)
+	aggClause := fmt.Sprintf("%s(value)", aggregate)
 	var sql string
-	sql = fmt.Sprintf(`SELECT time_bucket('%s seconds', time) as timeframe, sensorname, %s FROM readings 
+	sql = fmt.Sprintf(`SELECT "sensorname", %s FROM readings 
                             WHERE %s and time >= '%s' and time < '%s'
-                            GROUP BY timeframe, sensorname ORDER BY timeframe`,
-		fmt.Sprintf("%f", aggInterval.Seconds()),
+                            group by time(%ds), "sensorname"`,
 		aggClause,
 		d.getSensorsWhereString(nSensors),
 		interval.StartString(),
-		interval.EndString())
+		interval.EndString(),
+		int(aggInterval.Seconds()))
 
-	humanLabel := "TimescaleDB aggregated history for sensors"
+	humanLabel := "Influx aggregated history for sensors"
 	humanDesc := humanLabel
-	d.fillInQuery(qi, humanLabel, humanDesc, "readings", sql)
+	d.fillInQuery(qi, humanLabel, humanDesc, sql)
 }

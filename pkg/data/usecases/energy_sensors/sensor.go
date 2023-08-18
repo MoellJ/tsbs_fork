@@ -12,13 +12,13 @@ const (
 
 var (
 	DataFormatChoices = []string{
-		"Continuous Numeric",
-		"Generic Numeric",
-		"Discrete Numeric",
+		"Continuous_Numeric",
+		"Generic_Numeric",
+		"Discrete_Numeric",
 	}
 
 	UnitChoices = []string{
-		"",
+		"empty",
 		"°C",
 		"kW",
 		"m³/h",
@@ -66,7 +66,7 @@ func newSensorWithMeasurementGenerator(i int, start time.Time, generator func(ti
 
 	h := Sensor{
 		tags: []common.Tag{
-			{Key: []byte("name"), Value: fmt.Sprintf(sensorNameFmt, i)},
+			{Key: []byte("sensorname"), Value: fmt.Sprintf(sensorNameFmt, i)},
 			{Key: []byte("data_format"), Value: common.RandomStringSliceChoice(DataFormatChoices)},
 			{Key: []byte("unit"), Value: unit},
 		},
