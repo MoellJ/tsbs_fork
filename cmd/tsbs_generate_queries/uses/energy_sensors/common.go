@@ -32,7 +32,7 @@ var (
 		AggMin,
 		AggCount,
 		AggStdDev,
-		AggVariance,
+		//AggVariance,
 	}
 )
 

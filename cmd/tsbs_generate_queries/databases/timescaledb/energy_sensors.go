@@ -45,7 +45,7 @@ func (d *EnergySensors) LastPointForSensors(qi query.Query, nSensors int) {
 func (d *EnergySensors) HistoryForSensors(qi query.Query, nSensors int, timeRange time.Duration) {
 	interval := d.Interval.MustRandWindow(timeRange)
 	var sql string
-	sql = fmt.Sprintf(`SELECT * FROM readings WHERE %s and time >= '%s' and time < '%s' ORDER BY time DESC`,
+	sql = fmt.Sprintf(`SELECT * FROM readings WHERE %s and time >= '%s' and time < '%s' ORDER BY time ASC`,
 		d.getSensorsWhereString(nSensors),
 		interval.StartString(),
 		interval.EndString())
