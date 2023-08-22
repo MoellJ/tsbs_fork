@@ -21,7 +21,7 @@ const (
 	AggMin      = "min"
 	AggCount    = "count"
 	AggStdDev   = "StdDev"
-	AggVariance = "Variance"
+	AggVariance = "variance"
 )
 
 var (

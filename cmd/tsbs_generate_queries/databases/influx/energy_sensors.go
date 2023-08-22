@@ -62,9 +62,12 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 	if aggregate == energy_sensors.AggRand {
 		aggregate = common.RandomStringSliceChoice(energy_sensors.AggChoices)
 	}
+	if aggregate == energy_sensors.AggAvg {
+		aggregate = "mean"
+	}
 	aggClause := fmt.Sprintf("%s(value)", aggregate)
 	var sql string
-	sql = fmt.Sprintf(`SELECT "sensorname", %s FROM readings 
+	sql = fmt.Sprintf(`SELECT %s FROM readings 
                             WHERE %s and time >= '%s' and time < '%s'
                             group by time(%ds), "sensorname"`,
 		aggClause,
