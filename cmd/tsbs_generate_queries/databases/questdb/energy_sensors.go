@@ -62,6 +62,9 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 	if aggregate == energy_sensors.AggStdDev {
 		aggregate = "stddev_samp"
 	}
+	if aggregate == energy_sensors.AggVariance {
+		panic("not implemented")
+	}
 
 	aggClause := fmt.Sprintf("%[1]s(value) as %[1]s_value", aggregate)
 	var sql string

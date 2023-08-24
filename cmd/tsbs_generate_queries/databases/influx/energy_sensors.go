@@ -65,6 +65,9 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 	if aggregate == energy_sensors.AggAvg {
 		aggregate = "mean"
 	}
+	if aggregate == energy_sensors.AggVariance {
+		panic("not implemented")
+	}
 	aggClause := fmt.Sprintf("%s(value)", aggregate)
 	var sql string
 	sql = fmt.Sprintf(`SELECT %s FROM readings 
