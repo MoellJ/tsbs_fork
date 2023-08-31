@@ -28,6 +28,7 @@ type statProcessorArgs struct {
 	prewarmQueries   bool    // PrewarmQueries tells the StatProcessor whether we're running each query twice to prewarm the cache
 	limit            *uint64 // limit is the number of statistics to analyze before stopping
 	burnIn           uint64  // burnIn is the number of statistics to ignore before analyzing
+	cooldown         uint64  // cooldown is the number of statistics to ignore at the end of the run for analyzing
 	printInterval    uint64  // printInterval is how often print intermediate stats (number of queries)
 	hdrLatenciesFile string  // hdrLatenciesFile is the filename to Write the High Dynamic Range (HDR) Histogram of Response Latencies to
 
@@ -102,6 +103,16 @@ func (sp *defaultStatProcessor) process(workers uint) {
 			i++
 			statPool.Put(stat)
 			continue
+		} else if *sp.args.limit-i <= sp.args.cooldown {
+			if *sp.args.limit-i == sp.args.cooldown && sp.args.cooldown > 0 {
+				_, err := fmt.Fprintf(os.Stderr, "starting cooldown (%d) after %d queries with %d workers\n", sp.args.cooldown, i, workers)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			i++
+			statPool.Put(stat)
+			continue
 		} else if i == sp.args.burnIn && sp.args.burnIn > 0 {
 			_, err := fmt.Fprintf(os.Stderr, "burn-in complete after %d queries with %d workers\n", sp.args.burnIn, workers)
 			if err != nil {
@@ -144,7 +155,7 @@ func (sp *defaultStatProcessor) process(workers uint) {
 			intervalQueryRate := float64(sp.opsCount-prevRequestCount) / float64(took.Seconds())
 			overallQueryRate := float64(sp.opsCount) / float64(sinceStart.Seconds())
 			_, err := fmt.Fprintf(os.Stderr, "After %d queries with %d workers:\nInterval query rate: %0.2f queries/sec\tOverall query rate: %0.2f queries/sec\n",
-				i-sp.args.burnIn,
+				i-sp.args.burnIn-sp.args.cooldown,
 				workers,
 				intervalQueryRate,
 				overallQueryRate,
@@ -167,7 +178,7 @@ func (sp *defaultStatProcessor) process(workers uint) {
 	sinceStart := time.Now().Sub(sp.startTime)
 	overallQueryRate := float64(sp.opsCount) / float64(sinceStart.Seconds())
 	// the final stats output goes to stdout:
-	_, err := fmt.Printf("Run complete after %d queries with %d workers (Overall query rate %0.2f queries/sec):\n", i-sp.args.burnIn, workers, overallQueryRate)
+	_, err := fmt.Printf("Run complete after %d queries with %d workers (Overall query rate %0.2f queries/sec):\n", i-sp.args.burnIn-sp.args.cooldown, workers, overallQueryRate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -223,6 +234,7 @@ func (sp *defaultStatProcessor) GetTotalsMap() map[string]interface{} {
 	totals["limit"] = sp.args.limit
 	// burnIn is the number of statistics to ignore before analyzing
 	totals["burnIn"] = sp.args.burnIn
+	totals["cooldown"] = sp.args.cooldown
 	sinceStart := time.Now().Sub(sp.startTime)
 	// calculate overall query rates
 	queryRates := make(map[string]interface{})

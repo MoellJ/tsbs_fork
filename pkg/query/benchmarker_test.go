@@ -200,7 +200,7 @@ func TestBenchmarkRunnerRunPanicOnBurnInBiggerThanLimit(t *testing.T) {
 		},
 	}
 	defer func() {
-		if r := recover(); r != "burn-in is larger than limit" {
+		if r := recover(); r != "burn-in + cooldown is larger than limit" {
 			t.Error("wrong panic")
 		}
 	}()

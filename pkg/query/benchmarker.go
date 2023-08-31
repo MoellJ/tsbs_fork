@@ -35,6 +35,7 @@ type BenchmarkRunnerConfig struct {
 	Debug            int    `mapstructure:"debug"`
 	FileName         string `mapstructure:"file"`
 	BurnIn           uint64 `mapstructure:"burn-in"`
+	Cooldown         uint64 `mapstructure:"cooldown"`
 	PrintInterval    uint64 `mapstructure:"print-interval"`
 	PrewarmQueries   bool   `mapstructure:"prewarm-queries"`
 	ResultsFile      string `mapstructure:"results-file"`
@@ -44,6 +45,7 @@ type BenchmarkRunnerConfig struct {
 func (c BenchmarkRunnerConfig) AddToFlagSet(fs *pflag.FlagSet) {
 	fs.String("db-name", "benchmark", "Name of database to use for queries")
 	fs.Uint64("burn-in", 0, "Number of queries to ignore before collecting statistics.")
+	fs.Uint64("cooldown", 0, "Number of queries to ignore at the end of run. Can only be used when 'max-queries' is set.")
 	fs.Uint64("max-queries", 0, "Limit the number of queries to send, 0 = no limit")
 	fs.Uint64("max-rps", 0, "Limit the rate of queries per second, 0 = no limit")
 	fs.Uint64("print-interval", 100, "Print timing stats to stderr after this many queries (0 to disable)")
@@ -77,6 +79,7 @@ func NewBenchmarkRunner(config BenchmarkRunnerConfig) *BenchmarkRunner {
 		printInterval:    runner.PrintInterval,
 		prewarmQueries:   runner.PrewarmQueries,
 		burnIn:           runner.BurnIn,
+		cooldown:         runner.Cooldown,
 		hdrLatenciesFile: runner.HDRLatenciesFile,
 	}
 
@@ -143,8 +146,11 @@ func (b *BenchmarkRunner) Run(queryPool *sync.Pool, processorCreateFn ProcessorC
 	}
 
 	spArgs := b.sp.getArgs()
-	if spArgs.burnIn > b.Limit {
-		panic("burn-in is larger than limit")
+	if spArgs.cooldown > 0 && b.Limit == 0 {
+		panic("Cooldown can only be set when 'max-queries' is known")
+	}
+	if spArgs.burnIn+spArgs.cooldown > b.Limit {
+		panic("burn-in + cooldown is larger than limit")
 	}
 	b.ch = make(chan Query, b.Workers)
 
