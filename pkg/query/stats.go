@@ -101,6 +101,10 @@ func (s *statGroup) string() string {
 		s.count)
 }
 
+func (s *statGroup) metricsMap() map[string]float64 {
+	return map[string]float64{"min": s.Min(), "median": s.Median(), "mean": s.Mean(), "max": s.Max(), "stddev": s.StdDev(), "sum": s.sum / hdrScaleFactor, "count": float64(s.count)}
+}
+
 func (s *statGroup) write(w io.Writer) error {
 	_, err := fmt.Fprintln(w, s.string())
 	return err

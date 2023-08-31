@@ -97,7 +97,7 @@ func (w *HTTPClient) Do(q *query.HTTP, opts *HTTPClientDoOptions) (lag float64, 
 			bodyBytes, _ := io.ReadAll(resp.Body)
 			bodyString := string(bodyBytes)
 			fmt.Fprintf(os.Stderr, "Query: %s \n", q.RawQuery)
-			fmt.Fprintf(os.Stderr, "statuscode: %f, %s -- %s", resp.StatusCode, resp.Header, bodyString)
+			fmt.Fprintf(os.Stderr, "statuscode: %d, %s -- %s", resp.StatusCode, resp.Header, bodyString)
 		}
 		panic("http request did not return status 200 OK")
 	}

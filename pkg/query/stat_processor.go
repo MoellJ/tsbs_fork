@@ -250,6 +250,12 @@ func (sp *defaultStatProcessor) GetTotalsMap() map[string]interface{} {
 		quantiles[stripRegex(label)] = all
 	}
 	totals["overallQuantiles"] = quantiles
+
+	finalMetrics := make(map[string]interface{})
+	for label, statGroup := range sp.statMapping {
+		finalMetrics[stripRegex(label)] = statGroup.metricsMap()
+	}
+	totals["finalMetrics"] = finalMetrics
 	return totals
 }
 
