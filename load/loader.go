@@ -39,6 +39,7 @@ type BenchmarkRunnerConfig struct {
 	DoCreateDB          bool          `yaml:"do-create-db" mapstructure:"do-create-db" json:"do-create-db"`
 	DoAbortOnExist      bool          `yaml:"do-abort-on-exist" mapstructure:"do-abort-on-exist" json:"do-abort-on-exist"`
 	ReportingPeriod     time.Duration `yaml:"reporting-period" mapstructure:"reporting-period" json:"reporting-period"`
+	ReportingDelay      time.Duration `yaml:"reporting-delay" mapstructure:"reporting-delay" json:"reporting-delay"`
 	HashWorkers         bool          `yaml:"hash-workers" mapstructure:"hash-workers" json:"hash-workers"`
 	NoFlowControl       bool          `yaml:"no-flow-control" mapstructure:"no-flow-control" json:"no-flow-control"`
 	ChannelCapacity     uint          `yaml:"channel-capacity" mapstructure:"channel-capacity" json:"channel-capacity"`
@@ -60,6 +61,7 @@ func (c BenchmarkRunnerConfig) AddToFlagSet(fs *pflag.FlagSet) {
 	fs.Bool("do-create-db", true, "Whether to create the database. Disable on all but one client if running on a multi client setup.")
 	fs.Bool("do-abort-on-exist", false, "Whether to abort if a database with the given name already exists.")
 	fs.Duration("reporting-period", 10*time.Second, "Period to report write stats")
+	fs.Duration("reporting-delay", 0, "Period to wait before staring with stats reporting")
 	fs.String("file", "", "File name to read data from")
 	fs.Int64("seed", 0, "PRNG seed (default: 0, which uses the current timestamp)")
 	fs.String("insert-intervals", "", "Time to wait between each insert, default '' => all workers insert ASAP. '1,2' = worker 1 waits 1s between inserts, worker 2 and others wait 2s. (Unit adjustable with insert-intervals-unit)")
@@ -132,7 +134,7 @@ func (l *CommonBenchmarkRunner) preRun(b targets.Benchmark) (*sync.WaitGroup, *t
 	}
 
 	if l.ReportingPeriod.Nanoseconds() > 0 {
-		go l.report(l.ReportingPeriod)
+		go l.report(l.ReportingPeriod, l.ReportingDelay)
 	}
 	wg := &sync.WaitGroup{}
 	wg.Add(int(l.Workers))
@@ -318,16 +320,22 @@ func (l *CommonBenchmarkRunner) summary(took time.Duration) {
 }
 
 // report handles periodic reporting of loading stats
-func (l *CommonBenchmarkRunner) report(period time.Duration) {
+func (l *CommonBenchmarkRunner) report(period time.Duration, initialDelay time.Duration) {
+	time.Sleep(initialDelay)
+	startMetricCount := atomic.LoadUint64(&l.metricCnt)
+	startRowCount := atomic.LoadUint64(&l.rowCnt)
+
 	start := time.Now()
 	prevTime := start
 	prevColCount := uint64(0)
 	prevRowCount := uint64(0)
-
+	if startMetricCount > 0 {
+		printFn("Ignored metrics: %d\n", startMetricCount)
+	}
 	printFn("time,per. metric/s,metric total,overall metric/s,per. row/s,row total,overall row/s\n")
 	for now := range time.NewTicker(period).C {
-		cCount := atomic.LoadUint64(&l.metricCnt)
-		rCount := atomic.LoadUint64(&l.rowCnt)
+		cCount := atomic.LoadUint64(&l.metricCnt) - startMetricCount
+		rCount := atomic.LoadUint64(&l.rowCnt) - startRowCount
 
 		sinceStart := now.Sub(start)
 		took := now.Sub(prevTime)

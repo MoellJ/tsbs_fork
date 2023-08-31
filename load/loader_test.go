@@ -443,7 +443,7 @@ func TestReport(t *testing.T) {
 	}
 	br := &CommonBenchmarkRunner{}
 	duration := 200 * time.Millisecond
-	go br.report(duration)
+	go br.report(duration, 0)
 
 	time.Sleep(25 * time.Millisecond)
 	if got := atomic.LoadInt64(&counter); got != 1 {
