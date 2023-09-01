@@ -36,13 +36,15 @@ type statProcessorArgs struct {
 
 // statProcessor is used to collect, analyze, and print query execution statistics.
 type defaultStatProcessor struct {
-	args        *statProcessorArgs
-	wg          sync.WaitGroup
-	c           chan *Stat // c is the channel for Stats to be sent for processing
-	opsCount    uint64
-	startTime   time.Time
-	endTime     time.Time
-	statMapping map[string]*statGroup
+	args                 *statProcessorArgs
+	wg                   sync.WaitGroup
+	c                    chan *Stat // c is the channel for Stats to be sent for processing
+	opsCount             uint64
+	startTime            time.Time
+	endTime              time.Time
+	measurementStartTime time.Time
+	measurementEndTime   time.Time
+	statMapping          map[string]*statGroup
 }
 
 func newStatProcessor(args *statProcessorArgs) statProcessor {
@@ -105,6 +107,7 @@ func (sp *defaultStatProcessor) process(workers uint) {
 			continue
 		} else if *sp.args.limit-i <= sp.args.cooldown {
 			if *sp.args.limit-i == sp.args.cooldown && sp.args.cooldown > 0 {
+				sp.measurementEndTime = time.Now()
 				_, err := fmt.Fprintf(os.Stderr, "starting cooldown (%d) after %d queries with %d workers\n", sp.args.cooldown, i, workers)
 				if err != nil {
 					log.Fatal(err)
@@ -114,6 +117,7 @@ func (sp *defaultStatProcessor) process(workers uint) {
 			statPool.Put(stat)
 			continue
 		} else if i == sp.args.burnIn && sp.args.burnIn > 0 {
+			sp.measurementStartTime = time.Now()
 			_, err := fmt.Fprintf(os.Stderr, "burn-in complete after %d queries with %d workers\n", sp.args.burnIn, workers)
 			if err != nil {
 				log.Fatal(err)
@@ -175,10 +179,11 @@ func (sp *defaultStatProcessor) process(workers uint) {
 			prevTime = now
 		}
 	}
+	sp.endTime = time.Now()
 	sinceStart := time.Now().Sub(sp.startTime)
 	overallQueryRate := float64(sp.opsCount) / float64(sinceStart.Seconds())
 	// the final stats output goes to stdout:
-	_, err := fmt.Printf("Run complete after %d queries with %d workers (Overall query rate %0.2f queries/sec):\n", i-sp.args.burnIn-sp.args.cooldown, workers, overallQueryRate)
+	_, err := fmt.Printf("Run complete after %d queries with %d workers (Overall query rate %0.2f queries/sec ignoring safety periods):\n", i-sp.args.burnIn-sp.args.cooldown, workers, overallQueryRate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -235,11 +240,15 @@ func (sp *defaultStatProcessor) GetTotalsMap() map[string]interface{} {
 	// burnIn is the number of statistics to ignore before analyzing
 	totals["burnIn"] = sp.args.burnIn
 	totals["cooldown"] = sp.args.cooldown
-	sinceStart := time.Now().Sub(sp.startTime)
+	totals["measurementStartTime"] = sp.measurementStartTime.UTC().UnixMilli()
+	totals["measurementEndTime"] = sp.measurementEndTime.UTC().UnixMilli()
+	totals["endTime"] = sp.endTime.UTC().UnixMilli()
+	totals["startTime"] = sp.startTime.UTC().UnixMilli()
+	measurementDuration := sp.measurementEndTime.Sub(sp.measurementStartTime)
 	// calculate overall query rates
 	queryRates := make(map[string]interface{})
 	for label, statGroup := range sp.statMapping {
-		overallQueryRate := float64(statGroup.count) / sinceStart.Seconds()
+		overallQueryRate := float64(statGroup.count) / measurementDuration.Seconds()
 		queryRates[stripRegex(label)] = overallQueryRate
 	}
 	totals["overallQueryRates"] = queryRates

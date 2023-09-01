@@ -25,8 +25,10 @@ const (
 
 // change for more useful testing
 var (
-	printFn = fmt.Printf
-	fatal   = log.Fatalf
+	printFn              = fmt.Printf
+	fatal                = log.Fatalf
+	measurementStartTime time.Time
+	reportings           []map[string]float64
 )
 
 // BenchmarkRunnerConfig contains all the configuration information required for running BenchmarkRunner.
@@ -157,6 +159,8 @@ func (l *CommonBenchmarkRunner) postRun(wg *sync.WaitGroup, start *time.Time) {
 
 func (l *CommonBenchmarkRunner) saveTestResult(took time.Duration, start time.Time, end time.Time, metricRate, rowRate float64) {
 	totals := make(map[string]interface{})
+	totals["measurementStartTime"] = measurementStartTime.UTC().UnixMilli()
+	totals["reportings"] = reportings
 	totals["metricRate"] = metricRate
 	if l.rowCnt > 0 {
 		totals["rowRate"] = rowRate
@@ -165,8 +169,8 @@ func (l *CommonBenchmarkRunner) saveTestResult(took time.Duration, start time.Ti
 	testResult := LoaderTestResult{
 		ResultFormatVersion: LoaderTestResultVersion,
 		RunnerConfig:        l.BenchmarkRunnerConfig,
-		StartTime:           start.Unix(),
-		EndTime:             end.Unix(),
+		StartTime:           start.UTC().UnixMilli(),
+		EndTime:             end.UTC().UnixMilli(),
 		DurationMillis:      took.Milliseconds(),
 		Totals:              totals,
 	}
@@ -326,6 +330,7 @@ func (l *CommonBenchmarkRunner) report(period time.Duration, initialDelay time.D
 	startRowCount := atomic.LoadUint64(&l.rowCnt)
 
 	start := time.Now()
+	measurementStartTime = start
 	prevTime := start
 	prevColCount := uint64(0)
 	prevRowCount := uint64(0)
@@ -348,7 +353,8 @@ func (l *CommonBenchmarkRunner) report(period time.Duration, initialDelay time.D
 		} else {
 			printFn("%d,%0.2f,%E,%0.2f,-,-,-\n", now.Unix(), colrate, float64(cCount), overallColRate)
 		}
-
+		mp := map[string]float64{"timestamp": float64(now.UTC().UnixMilli()), "metrics_per_s": colrate, "total_metrics": float64(cCount), "total_metrics_per_s": overallColRate}
+		reportings = append(reportings, mp)
 		prevColCount = cCount
 		prevRowCount = rCount
 		prevTime = now
