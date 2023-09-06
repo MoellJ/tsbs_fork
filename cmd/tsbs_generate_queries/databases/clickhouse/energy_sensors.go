@@ -112,7 +112,7 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 			interval.End().Format(clickhouseTimeStringFormat))
 	}
 
-	humanLabel := "TimescaleDB aggregated history for sensors"
+	humanLabel := "ClickHouse aggregated history for sensors"
 	humanDesc := humanLabel
 	d.fillInQuery(qi, humanLabel, humanDesc, "readings", sql)
 }

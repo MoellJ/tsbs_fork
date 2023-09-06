@@ -50,10 +50,13 @@ func init() {
 	pflag.CommandLine.Uint64("limit", 0, "Number of items to insert (0 = all of them).")
 	pflag.CommandLine.Bool("do-load", true, "Whether to write data. Set this flag to false to check input read speed.")
 	pflag.CommandLine.Duration("reporting-period", 10*time.Second, "Period to report write stats")
+	pflag.CommandLine.Duration("reporting-delay", 0, "Period to wait before staring with stats reporting")
 	pflag.CommandLine.String("file", "", "File name to read data from")
 	pflag.CommandLine.Int64("seed", 0, "PRNG seed (default: 0, which uses the current timestamp)")
 	pflag.CommandLine.String("insert-intervals", "", "Time to wait between each insert, default '' => all workers insert ASAP. '1,2' = worker 1 waits 1s between inserts, worker 2 and others wait 2s")
+	pflag.CommandLine.String("insert-intervals-unit", "second", "Unit for insert intervals. Options: second, millisecond, microsecond.")
 	pflag.CommandLine.Bool("hash-workers", false, "Whether to consistently hash insert data to the same workers (i.e., the data for a particular host always goes to the same worker)")
+	pflag.CommandLine.String("results-file", "", "Write the test results summary json to this file")
 	target.TargetSpecificFlags("", pflag.CommandLine)
 	pflag.Parse()
 

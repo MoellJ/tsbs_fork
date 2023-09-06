@@ -213,21 +213,25 @@ func (sp *defaultStatProcessor) process(workers uint) {
 func generateQuantileMap(hist *hdrhistogram.Histogram) (int64, map[string]float64) {
 	ops := hist.TotalCount()
 	q0 := 0.0
+	q25 := 0.0
 	q50 := 0.0
+	q75 := 0.0
 	q95 := 0.0
 	q99 := 0.0
 	q999 := 0.0
 	q100 := 0.0
 	if ops > 0 {
 		q0 = float64(hist.ValueAtQuantile(0.0)) / 10e2
+		q25 = float64(hist.ValueAtQuantile(25.0)) / 10e2
 		q50 = float64(hist.ValueAtQuantile(50.0)) / 10e2
+		q75 = float64(hist.ValueAtQuantile(75.0)) / 10e2
 		q95 = float64(hist.ValueAtQuantile(95.0)) / 10e2
 		q99 = float64(hist.ValueAtQuantile(99.0)) / 10e2
 		q999 = float64(hist.ValueAtQuantile(99.90)) / 10e2
 		q100 = float64(hist.ValueAtQuantile(100.0)) / 10e2
 	}
 
-	mp := map[string]float64{"q0": q0, "q50": q50, "q95": q95, "q99": q99, "q999": q999, "q100": q100}
+	mp := map[string]float64{"q0": q0, "q25": q25, "q50": q50, "q75": q75, "q95": q95, "q99": q99, "q999": q999, "q100": q100}
 	return ops, mp
 }
 
