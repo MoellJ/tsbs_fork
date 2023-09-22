@@ -4,18 +4,18 @@ import "math/rand"
 
 var (
 	// Batch chances.
-	bMissingChance        = 0.01
+	bMissingChance        = 0.00
 	bOutOfOrderChance     = 0.05
-	bInsertPreviousChance = 0.2
+	bInsertPreviousChance = 0.1
 
 	// Entry chances.
-	eMissingChance        = 0.1
+	eMissingChance        = 0.0
 	eOutOfOrderChance     = 0.15
-	eInsertPreviousChance = 0.2
+	eInsertPreviousChance = 0.15
 
 	// Zero values.
 	zeroTagChance   = 0.01
-	zeroFieldChance = 0.05
+	zeroFieldChance = 0.00
 )
 
 type batchConfig struct {
