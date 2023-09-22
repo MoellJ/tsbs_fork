@@ -11,7 +11,7 @@ const (
 	LastPointSingleSensor    = "lastpoint"
 	LastPointMultipleSensors = "lastpoint-multiple-sensors"
 	SmallHistory             = "history"
-	LargeHistory             = "history-large"
+	MediumHistory            = "history-medium"
 	Aggregate                = "aggregate-"
 
 	AggRand     = "rand"

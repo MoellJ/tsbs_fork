@@ -8,19 +8,21 @@ import (
 )
 
 type AggregateForSensors struct {
-	core      utils.QueryGenerator
-	sensors   int
-	duration  time.Duration
-	aggregate string
+	core         utils.QueryGenerator
+	sensors      int
+	duration     time.Duration
+	sampleLength time.Duration
+	aggregate    string
 }
 
-func NewAggregateForSensors(sensors int, duration time.Duration, aggregate string) utils.QueryFillerMaker {
+func NewAggregateForSensors(sensors int, duration time.Duration, sampleLength time.Duration, aggregate string) utils.QueryFillerMaker {
 	return func(core utils.QueryGenerator) utils.QueryFiller {
 		return &AggregateForSensors{
-			core:      core,
-			sensors:   sensors,
-			duration:  duration,
-			aggregate: aggregate,
+			core:         core,
+			sensors:      sensors,
+			duration:     duration,
+			sampleLength: sampleLength,
+			aggregate:    aggregate,
 		}
 	}
 }
@@ -31,6 +33,6 @@ func (d *AggregateForSensors) Fill(q query.Query) query.Query {
 	if !ok {
 		common.PanicUnimplementedQuery(d.core)
 	}
-	fc.AggregateForSensors(q, d.sensors, d.duration, time.Minute*5, d.aggregate)
+	fc.AggregateForSensors(q, d.sensors, d.duration, d.sampleLength, d.aggregate)
 	return q
 }
