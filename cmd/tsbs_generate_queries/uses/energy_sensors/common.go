@@ -12,6 +12,8 @@ const (
 	LastPointMultipleSensors = "lastpoint-multiple-sensors"
 	SmallHistory             = "history"
 	MediumHistory            = "history-medium"
+	SmallThresholdFilter     = "threshold-filter-small"
+	MediumThresholdFilter    = "threshold-filter-medium"
 	Aggregate                = "aggregate-"
 
 	AggRand     = "rand"
@@ -57,6 +59,10 @@ type HistoryFiller interface {
 
 type AggregateFiller interface {
 	AggregateForSensors(query.Query, int, time.Duration, time.Duration, string)
+}
+
+type ThresholdFilterFiller interface {
+	ThresholdFilterForSensors(query.Query, int, time.Duration, int, int)
 }
 
 func (d *Core) GetRandomSensors(nSensors int) ([]string, error) {

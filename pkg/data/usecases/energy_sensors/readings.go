@@ -30,7 +30,7 @@ var (
 			Label: []byte("value"),
 			DistributionMaker: func() common.Distribution {
 				return common.FP(
-					common.CWD(smallUD, 0, 15.0, rand.Float64()*15.0),
+					common.CWD(smallUD, 0, 23.0, rand.Float64()*15.0),
 					5,
 				)
 			},

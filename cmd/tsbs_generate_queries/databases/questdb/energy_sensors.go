@@ -81,3 +81,17 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 	humanDesc := humanLabel
 	d.fillInQuery(qi, humanLabel, humanDesc, sql)
 }
+
+func (d *EnergySensors) ThresholdFilterForSensors(qi query.Query, nSensors int, timeRange time.Duration, lower int, upper int) {
+	interval := d.Interval.MustRandWindow(timeRange)
+	var sql string
+	sql = fmt.Sprintf(`SELECT * FROM readings WHERE %s and timestamp >= '%s' and timestamp < '%s' and (value < %d or value > %d) ORDER BY timestamp ASC`,
+		d.getSensorsWhereString(nSensors),
+		interval.StartString(),
+		interval.EndString(),
+		lower,
+		upper)
+	humanLabel := "QuestDB threshold filter for sensors"
+	humanDesc := humanLabel
+	d.fillInQuery(qi, humanLabel, humanDesc, sql)
+}

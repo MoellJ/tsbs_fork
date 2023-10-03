@@ -56,7 +56,7 @@ var useCaseMatrix = map[string]map[string]utils.QueryFillerMaker{
 		energy_sensors.LastPointSingleSensor:                     energy_sensors.NewLastPointForSensors(1),
 		energy_sensors.LastPointMultipleSensors:                  energy_sensors.NewLastPointForSensors(10),
 		energy_sensors.SmallHistory:                              energy_sensors.NewHistoryForSensors(1, time.Hour*24),
-		energy_sensors.MediumHistory:                             energy_sensors.NewHistoryForSensors(20, time.Hour*24*7),
+		energy_sensors.MediumHistory:                             energy_sensors.NewHistoryForSensors(10, time.Hour*24*7),
 		energy_sensors.Aggregate + energy_sensors.AggRand:        energy_sensors.NewAggregateForSensors(10, time.Hour*24, time.Minute*5, energy_sensors.AggRand),
 		energy_sensors.Aggregate + `m-` + energy_sensors.AggRand: energy_sensors.NewAggregateForSensors(10, time.Hour*24*30, time.Minute*15, energy_sensors.AggRand),
 		energy_sensors.Aggregate + `l-` + energy_sensors.AggRand: energy_sensors.NewAggregateForSensors(10, time.Hour*24*365, time.Hour*24, energy_sensors.AggRand),
@@ -76,6 +76,9 @@ var useCaseMatrix = map[string]map[string]utils.QueryFillerMaker{
 		energy_sensors.Aggregate + `l-` + energy_sensors.AggCount:    energy_sensors.NewAggregateForSensors(10, time.Hour*24*365, time.Hour*24, energy_sensors.AggCount),
 		energy_sensors.Aggregate + `l-` + energy_sensors.AggStdDev:   energy_sensors.NewAggregateForSensors(10, time.Hour*24*365, time.Hour*24, energy_sensors.AggStdDev),
 		energy_sensors.Aggregate + `l-` + energy_sensors.AggVariance: energy_sensors.NewAggregateForSensors(10, time.Hour*24*365, time.Hour*24, energy_sensors.AggVariance),
+
+		energy_sensors.SmallThresholdFilter:  energy_sensors.NewThresholdFilterForSensors(1, time.Hour*24),
+		energy_sensors.MediumThresholdFilter: energy_sensors.NewThresholdFilterForSensors(10, time.Hour*24),
 	},
 }
 

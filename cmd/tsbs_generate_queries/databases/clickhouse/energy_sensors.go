@@ -116,3 +116,34 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 	humanDesc := humanLabel
 	d.fillInQuery(qi, humanLabel, humanDesc, "readings", sql)
 }
+
+func (d *EnergySensors) ThresholdFilterForSensors(qi query.Query, nSensors int, timeRange time.Duration, lower int, upper int) {
+	interval := d.Interval.MustRandWindow(timeRange)
+	var sql string
+	if d.UseTags {
+		sql = fmt.Sprintf(`SELECT *
+		FROM 
+		(
+			SELECT * FROM readings 
+			WHERE (created_at >= toDateTime('%s')) AND (created_at < toDateTime('%s'))
+			AND (value < %d OR value > %d)
+		) AS r INNER JOIN tags AS t ON r.tags_id = t.id WHERE %s`,
+			interval.Start().Format(clickhouseTimeStringFormat),
+			interval.End().Format(clickhouseTimeStringFormat),
+			lower,
+			upper,
+			d.getSensorsWhereString(nSensors))
+	} else {
+		sql = fmt.Sprintf(`SELECT * FROM readings
+			WHERE %s AND (created_at >= toDateTime('%s')) AND (created_at < toDateTime('%s'))
+			AND (value < %d OR value > %d)`,
+			d.getSensorsWhereString(nSensors),
+			interval.Start().Format(clickhouseTimeStringFormat),
+			interval.End().Format(clickhouseTimeStringFormat),
+			lower,
+			upper)
+	}
+	humanLabel := "ClickHouse threshold filter for sensors"
+	humanDesc := humanLabel
+	d.fillInQuery(qi, humanLabel, humanDesc, "readings", sql)
+}
