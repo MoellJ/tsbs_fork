@@ -244,6 +244,12 @@ func (sp *defaultStatProcessor) GetTotalsMap() map[string]interface{} {
 	// burnIn is the number of statistics to ignore before analyzing
 	totals["burnIn"] = sp.args.burnIn
 	totals["cooldown"] = sp.args.cooldown
+	if sp.measurementStartTime.Before(sp.startTime) {
+		sp.measurementStartTime = sp.startTime
+	}
+	if sp.measurementEndTime.Before(sp.endTime) {
+		sp.measurementEndTime = sp.endTime
+	}
 	totals["measurementStartTime"] = sp.measurementStartTime.UTC().UnixMilli()
 	totals["measurementEndTime"] = sp.measurementEndTime.UTC().UnixMilli()
 	totals["endTime"] = sp.endTime.UTC().UnixMilli()

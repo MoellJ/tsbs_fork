@@ -213,6 +213,7 @@ func (b *BenchmarkRunner) saveTestResult(took time.Duration, start time.Time, en
 	_, _ = fmt.Printf("Saving results json file to %s\n", b.BenchmarkRunnerConfig.ResultsFile)
 	file, err := json.MarshalIndent(testResult, "", " ")
 	if err != nil {
+		fmt.Printf("%#v", testResult)
 		log.Fatal(err)
 	}
 
