@@ -18,10 +18,9 @@ var (
 	}
 
 	UnitChoices = []string{
-		"empty",
+		"temp2",
 		"°C",
 		"kW",
-		"m³/h",
 	}
 )
 
@@ -56,8 +55,8 @@ func newSensorMeasurements(start time.Time, unit string) []common.SimulatedMeasu
 
 // NewSensor creates a new sensor in a simulated energy sensor use case
 func NewSensor(i int, start time.Time) common.Generator {
-	truck := newSensorWithMeasurementGenerator(i, start, newSensorMeasurements)
-	return &truck
+	sensor := newSensorWithMeasurementGenerator(i, start, newSensorMeasurements)
+	return &sensor
 }
 
 func newSensorWithMeasurementGenerator(i int, start time.Time, generator func(time.Time, string) []common.SimulatedMeasurement) Sensor {
@@ -67,9 +66,9 @@ func newSensorWithMeasurementGenerator(i int, start time.Time, generator func(ti
 	h := Sensor{
 		tags: []common.Tag{
 			{Key: []byte("sensorname"), Value: fmt.Sprintf(sensorNameFmt, i)},
-			{Key: []byte("data_format"), Value: common.RandomStringSliceChoice(DataFormatChoices)},
-			{Key: []byte("unit"), Value: unit},
 		},
+		//			{Key: []byte("data_format"), Value: common.RandomStringSliceChoice(DataFormatChoices)},
+		//			{Key: []byte("unit"), Value: unit},
 		simulatedMeasurements: sm,
 	}
 

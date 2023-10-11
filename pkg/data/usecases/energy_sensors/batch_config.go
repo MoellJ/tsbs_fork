@@ -5,16 +5,16 @@ import "math/rand"
 var (
 	// Batch chances.
 	bMissingChance        = 0.00
-	bOutOfOrderChance     = 0.05
-	bInsertPreviousChance = 0.1
+	bOutOfOrderChance     = 0.1
+	bInsertPreviousChance = 0.0
 
 	// Entry chances.
 	eMissingChance        = 0.0
-	eOutOfOrderChance     = 0.15
-	eInsertPreviousChance = 0.15
+	eOutOfOrderChance     = 0.3
+	eInsertPreviousChance = 0.0
 
 	// Zero values.
-	zeroTagChance   = 0.01
+	zeroTagChance   = 0.00
 	zeroFieldChance = 0.00
 )
 

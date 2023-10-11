@@ -25,6 +25,18 @@ var (
 		},
 	}
 
+	temperatureFields2 = []common.LabeledDistributionMaker{
+		{
+			Label: []byte("value"),
+			DistributionMaker: func() common.Distribution {
+				return common.FP(
+					common.CWD(tempStepUD, -10.0, 35.0, rand.Float64()*45.0-10),
+					5,
+				)
+			},
+		},
+	}
+
 	powerFields = []common.LabeledDistributionMaker{
 		{
 			Label: []byte("value"),
@@ -62,8 +74,8 @@ func NewReadingsMeasurement(start time.Time, unit string) *ReadingsMeasurement {
 		sub = common.NewSubsystemMeasurementWithDistributionMakers(start, temperatureFields)
 	case "kW":
 		sub = common.NewSubsystemMeasurementWithDistributionMakers(start, powerFields)
-	default:
-		sub = common.NewSubsystemMeasurementWithDistributionMakers(start, temperatureFields)
+	case "temp2":
+		sub = common.NewSubsystemMeasurementWithDistributionMakers(start, temperatureFields2)
 	}
 
 	return &ReadingsMeasurement{

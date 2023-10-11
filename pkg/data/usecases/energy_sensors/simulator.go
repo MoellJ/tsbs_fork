@@ -8,7 +8,7 @@ import (
 
 const (
 	// The default size of a batch of entries within a simulation.
-	defaultBatchSize = 1
+	defaultBatchSize = 10
 )
 
 // SimulatorConfig is used to create an energy sensors Simulator.

@@ -91,10 +91,10 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 		aggregate = common.RandomStringSliceChoice(energy_sensors.AggChoices)
 	}
 	if aggregate == energy_sensors.AggStdDev {
-		aggregate = "stddevPop"
+		aggregate = "stddevPopStable"
 	}
-	if aggregate == energy_sensors.AggStdDev {
-		aggregate = "varPop"
+	if aggregate == energy_sensors.AggVariance {
+		aggregate = "stddevPop"
 	}
 	aggClause := fmt.Sprintf("%[1]s(value)", aggregate)
 	var sql string
