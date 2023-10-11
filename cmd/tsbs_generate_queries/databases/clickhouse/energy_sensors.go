@@ -87,6 +87,8 @@ func (d *EnergySensors) HistoryForSensors(qi query.Query, nSensors int, timeRang
 
 func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRange time.Duration, aggInterval time.Duration, aggregate string) {
 	interval := d.Interval.MustRandWindow(timeRange)
+	humanLabel := "ClickHouse " + aggregate + " aggregated history for sensors"
+	humanDesc := humanLabel
 	if aggregate == energy_sensors.AggRand {
 		aggregate = common.RandomStringSliceChoice(energy_sensors.AggChoices)
 	}
@@ -111,9 +113,6 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 			interval.Start().Format(clickhouseTimeStringFormat),
 			interval.End().Format(clickhouseTimeStringFormat))
 	}
-
-	humanLabel := "ClickHouse aggregated history for sensors"
-	humanDesc := humanLabel
 	d.fillInQuery(qi, humanLabel, humanDesc, "readings", sql)
 }
 
