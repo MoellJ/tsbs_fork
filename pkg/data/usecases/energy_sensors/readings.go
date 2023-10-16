@@ -9,7 +9,7 @@ import (
 
 var (
 	labelReadings = []byte("readings")
-	tempStepUD    = common.UD(-0.005, 0.005)
+	tempStepUD    = common.UD(-0.02, 0.02)
 
 	smallUD = common.UD(-1, 1)
 
@@ -18,7 +18,7 @@ var (
 			Label: []byte("value"),
 			DistributionMaker: func() common.Distribution {
 				return common.FP(
-					common.CWD(tempStepUD, 5.0, 35.0, rand.Float64()*25.0+5),
+					common.CWD(tempStepUD, 5.0, 40.0, rand.Float64()*25.0+5),
 					5,
 				)
 			},
@@ -30,7 +30,19 @@ var (
 			Label: []byte("value"),
 			DistributionMaker: func() common.Distribution {
 				return common.FP(
-					common.CWD(tempStepUD, -10.0, 35.0, rand.Float64()*45.0-10),
+					common.CWD(tempStepUD, -15.0, 35.0, rand.Float64()*45.0-10),
+					5,
+				)
+			},
+		},
+	}
+
+	temperatureFields3 = []common.LabeledDistributionMaker{
+		{
+			Label: []byte("value"),
+			DistributionMaker: func() common.Distribution {
+				return common.FP(
+					common.CWD(smallUD, 10.0, 80.0, rand.Float64()*40.0+40),
 					5,
 				)
 			},
@@ -42,7 +54,7 @@ var (
 			Label: []byte("value"),
 			DistributionMaker: func() common.Distribution {
 				return common.FP(
-					common.CWD(smallUD, 0, 23.0, rand.Float64()*15.0),
+					common.CWD(smallUD, 0, 25.0, rand.Float64()*15.0),
 					5,
 				)
 			},
@@ -76,6 +88,8 @@ func NewReadingsMeasurement(start time.Time, unit string) *ReadingsMeasurement {
 		sub = common.NewSubsystemMeasurementWithDistributionMakers(start, powerFields)
 	case "temp2":
 		sub = common.NewSubsystemMeasurementWithDistributionMakers(start, temperatureFields2)
+	case "temp3":
+		sub = common.NewSubsystemMeasurementWithDistributionMakers(start, temperatureFields3)
 	}
 
 	return &ReadingsMeasurement{

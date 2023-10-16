@@ -19,6 +19,7 @@ var (
 
 	UnitChoices = []string{
 		"temp2",
+		"temp3",
 		"°C",
 		"kW",
 	}
