@@ -49,6 +49,7 @@ func init() {
 	pflag.CommandLine.Uint("workers", 1, "Number of parallel clients inserting")
 	pflag.CommandLine.Uint64("limit", 0, "Number of items to insert (0 = all of them).")
 	pflag.CommandLine.Bool("do-load", true, "Whether to write data. Set this flag to false to check input read speed.")
+	pflag.CommandLine.Bool("sensor-index", false, "Whether to write data. Set this flag to false to check input read speed.")
 	pflag.CommandLine.Duration("reporting-period", 10*time.Second, "Period to report write stats")
 	pflag.CommandLine.Duration("reporting-delay", 0, "Period to wait before staring with stats reporting")
 	pflag.CommandLine.String("file", "", "File name to read data from")
@@ -73,6 +74,15 @@ func init() {
 	questdbRESTEndPoint = viper.GetString("url")
 	questdbILPBindTo = viper.GetString("ilp-bind-to")
 	config.HashWorkers = false
+
+	if viper.GetBool("sensor-index") {
+		execQuery(questdbRESTEndPoint, "CREATE TABLE readings (sensorname SYMBOL, value DOUBLE, timestamp TIMESTAMP) timestamp(timestamp)")
+		r, err := execQuery(questdbRESTEndPoint, "ALTER TABLE readings ALTER COLUMN sensorname ADD INDEX")
+		_ = r
+		if err == nil {
+			fmt.Println("Added index to sensorname column of readings table")
+		}
+	}
 	loader = load.GetBenchmarkRunner(config)
 }
 

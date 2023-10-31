@@ -39,6 +39,7 @@ type BenchmarkRunnerConfig struct {
 	PrintInterval    uint64 `mapstructure:"print-interval"`
 	PrewarmQueries   bool   `mapstructure:"prewarm-queries"`
 	ResultsFile      string `mapstructure:"results-file"`
+	SensorIndex      bool   `yaml:"sensor-index" mapstructure:"sensor-index"`
 }
 
 // AddToFlagSet adds command line flags needed by the BenchmarkRunnerConfig to the flag set.
@@ -54,6 +55,7 @@ func (c BenchmarkRunnerConfig) AddToFlagSet(fs *pflag.FlagSet) {
 	fs.Uint("workers", 1, "Number of concurrent requests to make.")
 	fs.Bool("prewarm-queries", false, "Run each query twice in a row so the warm query is guaranteed to be a cache hit")
 	fs.Bool("print-responses", false, "Pretty print response bodies for correctness checking (default false).")
+	fs.Bool("sensor-index", false, "Should add index for sensor column")
 	fs.Int("debug", 0, "Whether to print debug messages.")
 	fs.String("file", "", "File name to read queries from")
 	fs.String("results-file", "", "Write the test results summary json to this file")
