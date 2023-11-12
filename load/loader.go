@@ -49,8 +49,9 @@ type BenchmarkRunnerConfig struct {
 	InsertIntervalsUnit string        `yaml:"insert-intervals-unit" mapstructure:"insert-intervals-unit" json:"insert-intervals-unit"`
 	ResultsFile         string        `yaml:"results-file" mapstructure:"results-file" json:"results-file"`
 	// deprecated, should not be used in other places other than tsbs_load_xx commands
-	FileName string `yaml:"file" mapstructure:"file" json:"file"`
-	Seed     int64  `yaml:"seed" mapstructure:"seed" json:"seed"`
+	FileName    string `yaml:"file" mapstructure:"file" json:"file"`
+	Seed        int64  `yaml:"seed" mapstructure:"seed" json:"seed"`
+	SensorIndex bool   `yaml:"sensor-index" mapstructure:"sensor-index"`
 }
 
 // AddToFlagSet adds command line flags needed by the BenchmarkRunnerConfig to the flag set.
@@ -70,6 +71,7 @@ func (c BenchmarkRunnerConfig) AddToFlagSet(fs *pflag.FlagSet) {
 	fs.String("insert-intervals-unit", "second", "Unit for insert intervals. Options: second, millisecond, microsecond.")
 	fs.Bool("hash-workers", false, "Whether to consistently hash insert data to the same workers (i.e., the data for a particular host always goes to the same worker)")
 	fs.String("results-file", "", "Write the test results summary json to this file")
+	fs.Bool("sensor-index", false, "Should add index for sensor column")
 }
 
 type BenchmarkRunner interface {
