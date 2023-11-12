@@ -40,13 +40,14 @@ func init() {
 		panic(fmt.Errorf("unable to decode config: %s", err))
 	}
 	conf = &clickhouse.ClickhouseConfig{
-		Host:       viper.GetString("host"),
-		User:       viper.GetString("user"),
-		Password:   viper.GetString("password"),
-		LogBatches: viper.GetBool("log-batches"),
-		Debug:      viper.GetInt("debug"),
-		InTableTag: viper.GetBool("in-table-partition-tag"),
-		DbName:     loaderConf.DBName,
+		Host:        viper.GetString("host"),
+		User:        viper.GetString("user"),
+		Password:    viper.GetString("password"),
+		LogBatches:  viper.GetBool("log-batches"),
+		Debug:       viper.GetInt("debug"),
+		InTableTag:  viper.GetBool("in-table-partition-tag"),
+		SensorIndex: viper.GetBool("sensor-index"),
+		DbName:      loaderConf.DBName,
 	}
 
 	loader = load.GetBenchmarkRunner(loaderConf)

@@ -133,7 +133,7 @@ func createMetricsTable(conf *ClickhouseConfig, db *sqlx.DB, tableName string, f
 			continue
 		}
 		if conf.InTableTag && idx == 0 {
-			columnsWithType = append(columnsWithType, fmt.Sprintf("%s Nullable(String)", column))
+			columnsWithType = append(columnsWithType, fmt.Sprintf("%s String", column))
 		} else {
 			columnsWithType = append(columnsWithType, fmt.Sprintf("%s Nullable(Float64)", column))
 		}
@@ -152,6 +152,20 @@ func createMetricsTable(conf *ClickhouseConfig, db *sqlx.DB, tableName string, f
 			`,
 		tableName,
 		strings.Join(columnsWithType, ","))
+	if conf.SensorIndex {
+		sql = fmt.Sprintf(`
+			CREATE TABLE %s (
+				created_date    Date     DEFAULT today(),
+				created_at      DateTime DEFAULT now(),
+				time            String,
+				tags_id         UInt32,
+				%s,
+				additional_tags String   DEFAULT ''
+			) ENGINE = MergeTree() PARTITION BY toYYYYMM(created_date) PRIMARY KEY (sensorname, created_at)
+			`,
+			tableName,
+			strings.Join(columnsWithType, ","))
+	}
 	if conf.Debug > 0 {
 		fmt.Printf(sql)
 	}

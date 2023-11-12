@@ -17,10 +17,11 @@ type ClickhouseConfig struct {
 	User     string
 	Password string
 
-	LogBatches bool
-	InTableTag bool
-	Debug      int
-	DbName     string
+	LogBatches  bool
+	InTableTag  bool
+	SensorIndex bool
+	Debug       int
+	DbName      string
 }
 
 // String values of tags and fields to insert - string representation
