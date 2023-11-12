@@ -22,7 +22,7 @@ type naiveBenchmark struct {
 }
 
 func newNaiveBenchmark(l load.BenchmarkRunner, loaderConf *load.BenchmarkRunnerConfig) *naiveBenchmark {
-	return &naiveBenchmark{mongoBenchmark{loaderConf.FileName, l, &dbCreator{}}}
+	return &naiveBenchmark{mongoBenchmark{loaderConf.FileName, l, &dbCreator{sensorIndex: loaderConf.SensorIndex}}}
 }
 
 func (b *naiveBenchmark) GetProcessor() targets.Processor {

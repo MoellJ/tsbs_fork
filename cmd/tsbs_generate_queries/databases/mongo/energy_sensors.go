@@ -103,7 +103,7 @@ func (d *EnergySensors) HistoryForSensors(qi query.Query, nSensors int, timeRang
 }
 
 func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRange time.Duration, aggInterval time.Duration, aggregate string) {
-	humanLabel := "QuestDB " + aggregate + " aggregated history for sensors"
+	humanLabel := "MongoDB " + aggregate + " aggregated history for sensors"
 
 	interval := d.Interval.MustRandWindow(timeRange)
 	sensornames := d.getRandomSensors(nSensors)
@@ -160,6 +160,51 @@ func (d *EnergySensors) AggregateForSensors(qi query.Query, nSensors int, timeRa
 			"$sort": bson.M{"time_bucket": 1},
 		},
 	}
+
+	/*db.point_data.aggregate([
+	    {"$match": {"tags.sensorname": {"$in": ["sensor_42", "sensor_76", "sensor_78", "sensor_44", "sensor_5", "sensor_31", "sensor_80", "sensor_6", "sensor_25", "sensor_19"]}}},
+	    {"$match": {"time": {"$gte": ISODate("2020-01-01T05:12:38.404Z")}}},
+	    {"$match": {"time": {"$lt": ISODate("2020-01-02T05:12:38.404Z")}}},
+	    {
+	        "$addFields": {
+	            tb: {
+	                "$add": [
+	                    {
+	                        "$subtract": [
+	                            {"$subtract": ["$time", new Date(0)]},
+	                            {
+	                                "$mod": [
+	                                    {"$subtract": ["$time", new Date(0)]},
+	                                    1000 * 60 * 5
+	                                ]
+	                            }
+	                        ]
+	                    },
+	                    new Date(0)
+	                ]
+	            },
+	        }
+	    },
+	    {
+	        "$group": {
+	            _id: {
+	                sensorname: "$tags.sensorname",
+	                time_bucket: "$tb"
+	            },
+	            avg_value: {$avg: "$value"}
+	        }
+	    },
+	    {
+	        "$project": {
+	            sensorname: "$_id.sensorname",
+	            time_bucket: "$_id.time_bucket",
+	            _id: 0,
+	            avg_value: 1
+	        }
+	    },
+	    {$sort: {time_bucket: 1}}
+	])
+	*/
 	q := qi.(*query.Mongo)
 	q.HumanLabel = []byte(humanLabel)
 	q.BsonDoc = pipelineQuery

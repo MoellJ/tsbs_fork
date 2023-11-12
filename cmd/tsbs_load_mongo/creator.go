@@ -12,7 +12,8 @@ import (
 )
 
 type dbCreator struct {
-	client *mongo.Client
+	client      *mongo.Client
+	sensorIndex bool
 }
 
 func (d *dbCreator) Init() {
@@ -109,6 +110,20 @@ func (d *dbCreator) CreateDB(dbName string) error {
 		balancerRes := d.client.Database("admin").RunCommand(context.Background(), balancerCmd)
 		if balancerRes.Err() != nil {
 			return fmt.Errorf("balancerStart/Stop err: %v", balancerRes.Err().Error())
+		}
+	}
+
+	if d.sensorIndex {
+		var model []mongo.IndexModel
+		model = []mongo.IndexModel{
+			{
+				Keys: bson.D{{"tags.sensorname", 1}, {"time", -1}},
+			},
+		}
+		opts := options.CreateIndexes()
+		_, err := d.client.Database(dbName).Collection(collectionName).Indexes().CreateMany(context.Background(), model, opts)
+		if err != nil {
+			return fmt.Errorf("create indexes err: %v", err.Error())
 		}
 	}
 

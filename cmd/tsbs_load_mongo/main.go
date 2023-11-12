@@ -38,7 +38,8 @@ var (
 	collectionSharded    bool
 	numInitChunks        uint
 	shardKeySpec         string
-	balancerOn       bool
+	balancerOn           bool
+	sensorIndex          bool
 )
 
 // Global vars
@@ -78,12 +79,13 @@ func init() {
 	numInitChunks = viper.GetUint("number-initial-chunks")
 	shardKeySpec = viper.GetString("shard-key-spec")
 	balancerOn = viper.GetBool("balancer-on")
+	sensorIndex = viper.GetBool("sensor-index")
 	if documentPer {
 		config.HashWorkers = false
 	} else {
 		config.HashWorkers = true
 	}
-	
+
 	if !documentPer && timeseriesCollection {
 		log.Fatal("Must set document-per-event=true in order to use timeseries-collection=true")
 	}
@@ -92,6 +94,7 @@ func init() {
 
 func main() {
 	var benchmark targets.Benchmark
+	config.SensorIndex = sensorIndex
 	if documentPer {
 		benchmark = newNaiveBenchmark(loader, &config)
 	} else {
