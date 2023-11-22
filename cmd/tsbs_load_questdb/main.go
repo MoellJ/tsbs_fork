@@ -76,7 +76,7 @@ func init() {
 	config.HashWorkers = false
 
 	if viper.GetBool("sensor-index") {
-		execQuery(questdbRESTEndPoint, "CREATE TABLE readings (sensorname SYMBOL, value DOUBLE, timestamp TIMESTAMP) timestamp(timestamp)")
+		execQuery(questdbRESTEndPoint, "CREATE TABLE readings (sensorname SYMBOL, value DOUBLE, timestamp TIMESTAMP) timestamp(timestamp) PARTITION BY DAY WAL")
 		r, err := execQuery(questdbRESTEndPoint, "ALTER TABLE readings ALTER COLUMN sensorname ADD INDEX")
 		_ = r
 		if err == nil {
