@@ -23,6 +23,14 @@ func (d *dbCreator) Init() {
 	// fills dbCreator struct with data structure (tables description)
 	// specified at the beginning of the data file
 	d.headers = d.ds.Headers()
+	if tableCols == nil {
+		tableCols = make(map[string][]string)
+	}
+	tableCols["tags"] = d.headers.TagKeys
+	tagColumnTypes = d.headers.TagTypes
+	for tableName, fieldColumns := range d.headers.FieldKeys {
+		tableCols[tableName] = fieldColumns
+	}
 }
 
 // loader.DBCreator interface implementation
